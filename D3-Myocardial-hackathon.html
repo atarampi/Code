@@ -1,46 +1,380 @@
+
 <!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8">
+<meta charset="utf-8">
 
-		<!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
-		Remove this if you use the .htaccess -->
-		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<link href='http://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
 
-		<title>HTML</title>
-		<meta name="description" content="">
-		<meta name="author" content="AlexT">
+<style>
+	#wrapper {
+		margin: 0 auto;
+		width: 1200px;
+		position: absolute;
+	}
 
-		<meta name="viewport" content="width=device-width; initial-scale=1.0">
+	#wrapper h1 {
+		text-align: center;
+		font-size: 24px;
+		font-family: 'Lato', sans-serif;
+	}
 
-		<!-- Replace favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
-		<link rel="shortcut icon" href="/favicon.ico">
-		<link rel="apple-touch-icon" href="/apple-touch-icon.png">
-	</head>
+	#wrapper #button-wrapper {
+		margin: 0 auto;
+		width: 300px;
+	}
 
-	<body>
-		<div>
-			<header>
-				<h1>HTML</h1>
-			</header>
-			<nav>
-				<p>
-					<a href="/">Home</a>
-				</p>
-				<p>
-					<a href="/contact">Contact</a>
-				</p>
-			</nav>
+	#wrapper #button-wrapper button {
+		float: left;
+		border: 3px solid transparent;
+		margin: 4px;
+		padding: 8px;
+		font-size: 18px;
+		font-family: 'Lato', sans-serif;
+		color: #fff;
+		cursor: pointer;
+		opacity: .85;
+	}
 
-			<div>
+	#wrapper #button-wrapper button.active {
+		opacity: 1;
+		border-bottom: 3px solid red;
+	}
 
-			</div>
+	#wrapper #button-wrapper button:hover {
+		color: #000;
+		opacity: 1;
+	}
 
-			<footer>
-				<p>
-					&copy; Copyright  by AlexT
-				</p>
-			</footer>
+	#wrapper #button-wrapper button#mnhButton {
+		background-color: #2C7FB8;
+	}
+	#wrapper #button-wrapper button#bkButton {
+		background-color: #000000;
+	}
+	#wrapper #button-wrapper button#bothButton {
+		background-color: #666;
+	}
+		#wrapper #button-wrapper button#bkButton:hover {
+		color: #fff;
+	}
+
+	.textlabel {
+		font-size: 12px;
+		font-family: 'Lato', sans-serif;
+		z-index: 9999;
+		color: #fff;
+		line-height: 145%;
+	}
+
+	#displayBox {
+		width: 423px;
+		padding: 14px;
+		background-color: white;
+		position: relative;
+		opacity: 0.8;
+		filter: alpha(opacity=80);
+		font-size: 14px;
+		font-family: 'Lato', sans-serif;
+		color: #000;
+	}
+
+	#displayBox b {
+		font-size: 14px;
+		font-family: 'Lato', sans-serif;
+		color: #000;
+		font-weight: 700;
+	}
+
+	 g {
+		opacity: .85;
+		transition: opacity .25s ease-in-out;
+		-moz-transition: opacity .25s ease-in-out;
+		-webkit-transition: opacity .25s ease-in-out;
+		text-align: center;
+	}
+
+	g:hover {
+		cursor: pointer;
+		opacity: 1;
+	}
+
+	p#data-source {
+		text-align: center;
+		font-size: 14px;
+		font-family: 'Lato', sans-serif;
+	}
+
+	p#data-source a {
+		color: #000;
+	}
+	
+	div.textlabel span {
+		display: block;
+		margin-top: 8px; 
+		font-weight:bold;
+		line-height: 100%;
+	}
+</style>
+
+<body>
+	<div id="style"></div>
+	<div id="wrapper">
+		<h1>Myocardial Infarction: A comparison of hospital costs in Manhattan and Brooklyn</h1>
+		<link rel="stylesheet" type="text/css" href="colorbrewer.css" /> 
+		<script type="text/javascript" src="http://z.cdn.turner.com/money/.e/script/jquery/1.5.1/jquery.js"></script>
+		<script type="text/javascript" src="d3.v3.min.js"></script>
+		<script type="text/javascript" src="colorbrewer.js"></script>
+
+		<div id="button-wrapper">
+			<button class="active" type="button" id="bothButton" name="draw" />
+			All</button>
+			<button type="button" id="mnhButton" name="draw" />
+			Manhattan</button>
+			<button type="button" id="bkButton" name="draw" />
+			Brooklyn</button>
+			
+			<!--<button id="xButton" />remove</button>-->
 		</div>
-	</body>
+
+		<div id="graphSpot"></div>
+
+		<p id="data-source">
+			Data Source: <a href="http://www.cms.gov/Research-Statistics-Data-and-Systems/Statistics-Trends-and-Reports/Medicare-Provider-Charge-Data/index.html" target="_blank">CMSGOV: Medicare Provider Charge Data</a>
+		</p>
+	</div>
+
+	<script>
+		var arrayofPrices = {};
+		var textColors = {};
+		var textSizes = {};
+		var end = ["255", "0", "0"];
+		var start = ["255", "255", "255"];
+		for (i in start)
+		start[i] = parseFloat(start[i]);
+		for (i in end)
+		end[i] = parseFloat(end[i]);
+		
+		steps = 284;
+
+		var textColor = new Array();
+		for ( i = 0; i <= steps; i++) {
+			dec = i / steps;
+			r = Math.round(start[0] + dec * (end[0] - start[0]));
+			g = Math.round(start[1] + dec * (end[1] - start[1]));
+			b = Math.round(start[2] + dec * (end[2] - start[2]));
+			textColor[i] = "rgb(" + r + "," + g + "," + b + ")";
+		}
+		
+		
+		function gradientExtractor(prices) {
+			maxValue = 0;
+			minValue = 50000;
+			styleInfo = '';
+			for (var opacity_value in prices) {
+				var hopNumber = parseFloat(prices[opacity_value]);
+				if (hopNumber > maxValue) {
+					maxValue = hopNumber;
+				};
+				if (hopNumber < minValue) {
+					minValue = hopNumber;
+					
+				}
+				
+			};
+			for (var opacity_value in prices) {
+				var x = (prices[opacity_value] - minValue) / (maxValue - minValue);
+				
+				x = Math.round(x * 200) + 84;
+				
+				textColors[opacity_value] = textColor[x];
+				textSizes[opacity_value] = x > 200 ? 200: x;
+			};
+			
+			for (var opacity_value in textColors) {
+				styleInfo += '[id="' + opacity_value + '"].textlabel span {color:' + textColors[opacity_value] + '; font-size: ' + textSizes[opacity_value] +'%} '
+			};
+			$('#style').html('<style>' + styleInfo + '</style>')
+			
+			
+			
+		};
+
+		$(document).mouseup(function(e) {
+			var container = $("#displayBox");
+
+			if (container.has(e.target).length === 0) {
+				container.hide();
+			}
+		});
+		d3.select("#xButton").on("click", function() {
+			svg.selectAll(".node").remove();
+			$('#displayBox').hide()
+		});
+		d3.select("#bkButton").on("click", function() {
+			svg.selectAll(".node").remove();
+			drawGraph("brooklyn");
+		});
+		d3.select("#mnhButton").on("click", function() {
+			svg.selectAll(".node").remove();
+			drawGraph("manhattan");
+		});
+		d3.select("#bothButton").on("click", function() {
+			svg.selectAll(".node").remove();
+			drawGraph("myocardial_brooklyn");
+		});
+		var $displayBox = $('#displayBox');
+		var diameter = 1200, format = d3.format(",d"), color = d3.scale.ordinal()
+    .range(colorbrewer.YlGnBu[3]);
+
+		var bubble = d3.layout.pack().sort(null).size([diameter, diameter]).padding(1);
+
+		var svg = d3.select("#graphSpot").append("svg").attr("width", 1200).attr("height", diameter).attr("class", "bubble");
+		drawGraph = function(jsonData) {
+			d3.json(jsonData + ".json", function(error, root) {
+				var circle = svg.selectAll("circle");
+				var node = svg.selectAll(".node").data(bubble.nodes(classes(root)).filter(function(d) {
+					return !d.children;
+				}));
+				
+				gradientExtractor(arrayofPrices);
+				
+				
+				
+				
+				node.enter().append("g").on("mouseover", function(d) {
+					d3.select(this)
+					//.attr("stroke", "red")
+					//.transition().style("opacity", 0.5);
+				}).on("click", function(d) {
+
+					d3.select(this)
+
+					$('#displayBox').html('')
+					$('#displayBox').html(d.className);
+					$.getJSON('json/' + d.className + '.json', function(data) {
+						data = data[0];
+						deathData = data["Higher Estimate - Death from serious treatable complications after surgery"];
+						$displayBoxhtml = '';
+						$displayBoxhtml += '<br><br><b>Address:</b> ' + data["Address1"] + '<Br><Br><b>Serious blood clots after surgery:</b> ' + data["Rate - Serious blood clots after surgery"] + '<br><Br><b>Accidental cuts and tears from medical treatment:</b> ' + data["Number of Patients - Accidental cuts and tears from medical treatment"];
+
+						if (deathData > 0) {
+							$displayBoxhtml += '<br><br> <b>Death from serious treatable complications from surgery:</b> ' + deathData;
+
+						}
+						//$displayBoxhtml += "Provider Street Address: " + data[ProviderStreetAddress] + '<br>';
+						$('#displayBox').append($displayBoxhtml);
+					});
+
+					$('#displayBox').css("top", d.y + 20).css("left", d.x + 50).show();
+
+				}).on("mouseout", function() {
+					d3.select(this).transition()
+					//.attr("stroke", "none")
+					// .transition()
+					//.style("opacity", 1);
+
+				})
+
+				node.attr("class", "node").attr("transform", function(d) {
+					return "translate(" + d.x + "," + d.y + ")";
+
+				});
+				//  node.exit().remove();
+				node.append("title").html(function(d) {
+					return d.className
+				});
+
+				node.append("circle").attr("r", 0).transition().attr("r", function(d) {
+					return d.r;
+				}).style("fill", function(d) {
+					return color(d.packageName);
+				})
+
+				node.append("foreignObject").attr("width", 120).attr("height", 130).attr("transform", "translate(-60, -40)").append("xhtml:div").style("text-anchor", "top").attr("class", "textlabel").html(function(d) {
+					return (d.className + d.metaData ).substring(0, d.r / .2);
+				}).attr("id", function(d) {
+					
+					return d.ProviderId;
+				})
+			});
+			$('#displayBox').hide();
+			
+		}
+		// Returns a flattened hierarchy containing all leaf nodes under the root.
+		function classes(root) {
+			var classes = [];
+			arrayofPrices = {};
+			function recurse(name, node) {
+				if (node.children)
+					node.children.forEach(function(child) {
+						recurse(node.name, child);
+					});
+				else
+					
+					classes.push({
+						packageName : name,
+						className : node.name,
+						metaData : '<br /><span>Cost: $' + addCommas(Math.floor(node.AverageCoveredCharges)) + '</span>',
+						value : node.AverageCoveredCharges,
+						ProviderId: node._id
+					});
+					if(typeof node.AverageCoveredCharges != "undefined") {
+						arrayofPrices[node._id] = node.AverageCoveredCharges;
+						
+					};
+			}
+
+			recurse(null, root);
+			return {
+				children : classes
+			};
+		}
+
+		function addCommas(nStr) {
+			nStr += '';
+			x = nStr.split('.');
+			x1 = x[0];
+			x2 = x.length > 1 ? '.' + x[1] : '';
+			var rgx = /(\d+)(\d{3})/;
+			while (rgx.test(x1)) {
+				x1 = x1.replace(rgx, '$1' + ',' + '$2');
+			}
+			return x1 + x2;
+		}
+
+
+		d3.select(self.frameElement).style("height", diameter + "px");
+
+		//$("body").hover(function(){$('#displayBox').hide()});
+		drawGraph("myocardial_brooklyn");
+
+	</script>
+
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" ></script>
+
+	<script>
+	$(function() {
+		$('#bothButton').click(function() {
+			$('#bothButton').addClass('active');
+			$('#mnhButton').removeClass('active');
+			$('#bkButton').removeClass('active');
+		});
+
+		$('#mnhButton').click(function() {
+			$('#mnhButton').addClass('active');
+			$('#bothButton').removeClass('active');
+			$('#bkButton').removeClass('active');
+		});
+
+		$('#bkButton').click(function() {
+			$('#bkButton').addClass('active');
+			$('#bothButton').removeClass('active');
+			$('#mnhButton').removeClass('active');
+		});
+
+	});
+
+	</script>
+
+	<div id="displayBox" style="display:none;"></div>
+</body>
 </html>
