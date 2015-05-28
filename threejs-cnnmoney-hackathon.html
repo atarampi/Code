@@ -1,0 +1,502 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<title>Fantasy Stock League - Hackathon</title>
+
+		<script type='text/javascript' src='jquery-1.9.1.js'></script>
+
+		<link href='http://fonts.googleapis.com/css?family=Lato:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+		<link rel="stylesheet" type="text/css" href="styles/jquery-ui.css">
+		<link rel="stylesheet" type="text/css" href="styles/styles.css">
+		<script type="text/javascript" src="jquery-ui.js"></script>
+		<script type="text/javascript" src="jquery.touch-punch.min.js"></script>
+
+		<script src="three/three.min.js"></script>
+		<script src="three/tween.min.js"></script>
+		<script src="three/OrbitControls.js"></script>
+		<script src="three/CSS3DRenderer.js"></script>
+		<script src="three/TweenMax.js"></script>
+		<script src="scroll/jquery.jscrollpane.min.js"></script>
+		<script src="/stcejorp/ts/hackathon/1.4/leaderboard/js/tinysorts.js" type="text/javascript"></script>
+        <script src="/stcejorp/ts/hackathon/1.4/leaderboard/js/sort-leaderboard.js" type="text/javascript"></script>
+		<script type='text/javascript'>
+			//<![CDATA[
+			var userInfo = {};
+			var iSelectedThis = null;
+			var currentWallet = 1000000;
+			var submitted = false;
+			function numberWithCommas(x) {
+				return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+			}
+
+			function spendSpend(transaction, shares) {
+
+				floatValue = currentWallet - transaction;
+				currentWallet = floatValue;
+				floatValue = numberWithCommas(parseInt(floatValue));
+				$("#myWallet").html(floatValue);
+			};
+
+			function returnReturn(transaction, shares) {
+
+				floatValue = currentWallet + transaction;
+				currentWallet = floatValue;
+				floatValue = numberWithCommas(parseInt(floatValue));
+				$("#myWallet").html(floatValue);
+			};
+
+			function currentValues() {
+				arrayofValues = $("ol li span.price").map(function() {
+					return this.getAttribute("value");
+				}).get();
+				return arrayofValues
+			}
+
+			function currentSharesProcess() {
+				arrayofShares = $("ol li span.inputVal").map(function() {
+					return $(this).html();
+				}).get();
+				var result = null;
+				for (var i = 0; i < arrayofShares.length; i++) {
+					result += arrayofShares[i] * arrayofValues[i];
+				};
+				$("#myWallet").html(numberWithCommas(parseFloat(currentWallet - result).toFixed(2)));
+				spentAmount = parseFloat(result).toFixed(2);
+				spentAmount = (isNaN(spentAmount)) ? 0 : spentAmount;
+				$("#mySpender").html(numberWithCommas(spentAmount));
+				if (spentAmount > 1000000) {
+					$("#OverAmount").show()
+				} else {
+					$("#OverAmount").hide()
+				}
+				if (spentAmount == 0) {
+					$(".placeholder").show();
+					$("#submission").hide();
+				}
+			}
+
+			function cartHeight() {
+				windowHeight = $(window).height();
+				jQuery("#cart").css("max-height", windowHeight - 50);
+				if (parseInt(jQuery("#cart").css("height")) > windowHeight) {
+					jQuery("#cart").css("overflowY", "scroll")
+				} else {
+					jQuery("#cart").css("overflowY", "auto")
+				}
+			}
+
+
+			$(window).load(function() {
+				$(function() {
+					$("#catalog li").draggable({
+						appendTo : "body",
+						helper : "clone"
+					});
+					$("#catalog li").mousedown(function() {
+						iSelectedThis = $(this).index();
+					});
+					$("#cart ol").droppable({
+						out : function(event, ui) {
+							var self = ui;
+							//var idIndex = $(this).attr('id');
+							ui.helper.off('mouseup').on('mouseup', function() {
+								$(this).remove();
+								var selfIndex = $(this).attr('class');
+								cartHeight();
+								// console.log(idIndex);
+								selfIndex = selfIndex.replace("ui-draggable", "").replace("dropped", "").replace("ui-draggable-dragging", "").replace(" ", "").replace(" ", "").replace(" ", "");
+
+								$('#slider' + selfIndex).remove();
+								$('#' + selfIndex).show({
+									duration : 400
+								});
+								$('#dropped' + selfIndex).remove();
+								arrayValues = currentValues();
+								currentSharesProcess();
+							});
+						},
+						activeClass : "ui-state-default",
+						hoverClass : "ui-state-hover",
+						accept : ":not(.ui-sortable-helper)",
+						drop : function(event, ui) {
+
+							if (ui.draggable.is('.dropped'))
+								return false;
+
+							$('#catalog li:eq(' + iSelectedThis + ')').hide({
+								duration : 400
+							});
+							$(this).find(".placeholder").hide();
+							if (!submitted) {
+								$("#submission").show();
+							}
+							currID = ui.draggable.attr("id");
+							$("<li></li>").html(ui.draggable.html()).appendTo(this).draggable({
+								appendTo : "body",
+								helper : "clone"
+							}).addClass('dropped').addClass(currID).attr("id", 'dropped' + currID);
+
+							arrayValues = currentValues();
+							currentSharesProcess();
+							ourList = jQuery("li", this);
+							listLastItem = ourList.length - 1;
+							droppedItemValue = jQuery("span", ourList[listLastItem]);
+							cartHeight();
+							valValue = parseFloat(droppedItemValue.html());
+							//spendSpend(valValue, 1);
+							var select = ourList[listLastItem];
+							var slider = $("<div id='slider" + currID + "' value=" + valValue + " index=" + listLastItem + "></div>").insertAfter(select).slider({
+								min : 1,
+								max : 500,
+								step : 1,
+								range : "min",
+								value : 1,
+								slide : function(event, ui) {
+									currentID = $(this).closest("div").attr("id");
+									parentClass = currentID.replace("slider", "");
+
+									$("." + parentClass + " span.inputVal").html(ui.value);
+									sliderValue = parseFloat($('#' + currentID).attr("value"));
+
+									currentSharesProcess();
+
+								}
+							});
+							//console.log(parseInt(droppedItemValue.html()));
+						}
+					}).sortable({
+						items : "li:not(.placeholder)",
+						sort : function() {
+							$(this).removeClass("ui-state-default");
+						}
+					});
+
+				});
+			});
+			//]]>
+
+			function cnnad_getDEAdHeadCookie(x) {
+			};
+			companies = [{
+				name : "Yahoo!",
+				ticker : "YHOO",
+				price : "34.14",
+				x : -37.67775491403577,
+				y : -56.539366340626216,
+				z : -1798.717233708081
+			}, {
+				name : "CA Inc.",
+				ticker : "CA",
+				price : "29.75",
+				x : -594.6589611888413,
+				y : 465.87428118454324,
+				z : -1633.812068142663
+			}, {
+				name : "VeriSign Inc.",
+				ticker : "VRSN",
+				price : "100",
+				x : 643.2225640043569,
+				y : 811.579573240982,
+				z : -1472.2782785376069
+			}, {
+				name : "Analog Devices Inc.",
+				ticker : "ADI",
+				price : "51.62",
+				x : 1266.512821592023,
+				y : -312.5667198004706,
+				z : -1240.2609880247794
+			}, {
+				name : "Motorola Solutions Inc.",
+				ticker : "MSI",
+				price : "60.70",
+				x : 359.54218029569023,
+				y : -1429.9463169637504,
+				z : -1032.464503598082
+			}, {
+				name : "Xilinx",
+				ticker : "XLNX",
+				price : "46.71",
+				x : -923.7261626149983,
+				y : -1290.439093770868,
+				z : -849.4097490424735
+			}, {
+				name : "Fidelity National Information Services",
+				ticker : "FIS",
+				price : "47.05",
+				x : -1669.5541037525104,
+				y : -81.65158048558845,
+				z : -667.7739992298413
+			}, {
+				name : "KLA-Tencor",
+				ticker : "KLAC",
+				price : "70",
+				x : -1139.5326089533182,
+				y : 1286.0520827324315,
+				z : -536.2233430499678
+			}, {
+				name : "Amazon.com",
+				ticker : "AMZN",
+				price : "320.51",
+				x : 169.44935106655035,
+				y : 1749.5302242963205,
+				z : -387.8542402718176
+			}, {
+				name : "Apple",
+				ticker : "AAPL",
+				price : "489.56",
+				x : 1412.272916551082,
+				y : 1103.234118853829,
+				z : -168.4033496494496
+			}, {
+				name : "Symantec",
+				ticker : "SYMC",
+				price : "24.52",
+				x : 1782.4393363976726,
+				y : -250.50979924547954,
+				z : -12.443976223723292
+			}, {
+				name : "Western Digital Corp",
+				ticker : "WDC",
+				price : "70",
+				x : 1030.4332215818588,
+				y : -1467.2289896045663,
+				z : 159.51949073528561
+			}, {
+				name : "Paychex",
+				ticker : "PAYX",
+				price : "64.54",
+				x : -214.9057605788114,
+				y : -1759.3482293294624,
+				z : 313.86194739939685
+			}, {
+				name : "EBay",
+				ticker : "EBAY",
+				price : "55.63",
+				x : -1367.5727663790722,
+				y : -1037.5766982442942,
+				z : 541.4603622784848
+			}, {
+				name : "Fiserv",
+				ticker : "FISV",
+				price : "101.79",
+				x : -1598.0336900303826,
+				y : 361.9420212979976,
+				z : 745.1753476508668
+			}, {
+				name : "Total System Services",
+				ticker : "TSYS",
+				price : "2.47",
+				x : -675.8273584922462,
+				y : 1406.7379733364387,
+				z : 896.853196396525
+			}, {
+				name : "Visa",
+				ticker : "V",
+				price : "191.82",
+				x : 665.1292353189939,
+				y : 1303.5105919019632,
+				z : 1048.0759691565038
+			}, {
+				name : "Automatic Data Processing",
+				ticker : "ADP",
+				price : "72.02",
+				x : 1316.4366629138372,
+				y : 0.0017999999999618334,
+				z : 1227.5970481118889
+			}, {
+				name : "Priceline.com",
+				ticker : "PCLN",
+				price : "1067.38",
+				x : 428.3206369837068,
+				y : -996.104788638023,
+				z : 1436.773009903194
+			}, {
+				name : "Mastercard",
+				ticker : "MA",
+				price : "676.31",
+				x : -712.1452976233097,
+				y : -275.37450531126876,
+				z : 1630.036182695829
+			}];
+
+		</script>
+
+	</head>
+	<body>
+		<div id="letsBegin">
+		    <h1>Fantasy Stock League</h1>
+			<form id="header-search">
+    			<input type="text" class="searchbox" value="Enter Username" /><input type="submit" class="button" value=""  />
+			</form>
+			<span id="messager"> </span>
+		</div>
+		<div id="interactions">
+			<div id="tabulator">
+				<div id="products">
+					<h1 class="ui-widget-header">Stocks</h1>
+
+					<div id="catalog">
+						<h2 id="tech"></h2><h2></h2>
+
+						<div>
+							<ul>
+
+							</ul>
+						</div>
+					</div>
+				</div>
+				<div id="cart">
+					<h1 class="ui-widget-header">Your Fantasy Stock Team </h1>
+
+					<div class="ui-widget-content">
+						<ol>
+							<div class="placeholder">
+								Drop your stocks here
+							</div>
+						</ol>
+					</div>
+
+					
+				</div>
+			</div>
+			<div id="welcomeMat"></div>
+			<div id="wallet">
+				You have: $<span id="myWallet">1,000,000</span> left
+			</div>
+			<div id="spent">
+				You have spent $<span id="mySpender">0</span><span id="OverAmount" style="display:none;padding-left:15px;">YOU ARE OVER!</span>
+			</div>
+			<div id="container"></div>
+			<div id="research">
+						RESEARCH
+					</div>
+					<div id="submission">
+                        SUBMIT
+                    </div>
+			<div id="buyerseller">
+				BUY/SELL
+			</div>
+			<div id="leaderboardTab">
+			    <header>LEADERBOARD</header>
+			    <ol id="leaderboard"></ol>
+			</div>
+		</div>
+		<script>
+			$.each(companies, function(i, value) {
+				jQuery('#tech').append(jQuery("<li/>").attr("id", value.ticker).html(value.name + " - $<span class=\"price\" value =" + value.price + ">" + value.price + "</span> <Br><span class=\"inputVal\" >1</span> <span id=\"word\">shares</span>"));
+			});
+			$('#research').click(function() {
+
+				threeInit();
+			});
+		</script>
+		<script>
+			$('#products, #cart, #container').touchDraggable();
+			jQuery("#header-search .searchbox").focusin(function() {
+                if(($( this ).val())== "Enter Username") {
+                    $( this ).val("")
+                }
+            }).focusout(function() {
+                if(($( this ).val().length) == 0) {
+                    $( this ).val("Enter Username")
+                }
+            }).keypress(function(e) {
+                if(($( this ).val().length) > 15) {
+                    $("#messager").html("Maximum 16 characters");
+                    var key = e.charCode || e.keyCode;
+                    if(key == 122 || key == 27 || key == 8 ) {}
+                      else e.preventDefault();
+                } else {$("#messager").html("");}
+                var key = String.fromCharCode(e.which);
+                var allowed = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-_';
+                if(e.which != 8 && allowed.indexOf(key) < 0) {
+                    e.preventDefault();
+                    $("#messager").html("Character not allowed");
+                } 
+
+            });
+			$( "#header-search" ).submit(function( event ) {
+			    usernameLength = $( "#header-search .searchbox" ).val().length;
+			    mySubmission = $( "#header-search .searchbox" ).val();
+			    submissionCheck = false;
+			    for ( i = 0; i < leaderData.length; i++) {
+			    	if (mySubmission.toLowerCase() == leaderData[i].username.toLowerCase()) {
+			    		$("#messager").html("Username Taken");
+			    		return false;
+			    		break
+			    	}
+			    
+			    }
+			    
+			    
+			    if (usernameLength > 3 && usernameLength <= 16) {
+			        submissionCheck = true
+			    } else {
+			    	$("#messager").html("Username should be longer");
+			    }
+			    if(submissionCheck && mySubmission != "Enter Username") {
+			        userInfo = mySubmission;
+				    $("#letsBegin").hide();
+				    $("#interactions").show({duration: 1000});
+				    $("#welcomeMat").html("Welcome " + userInfo);
+				}
+				
+				event.preventDefault();
+			});
+			
+			leaderboard = {
+			    leaderboardOpen :false,
+			    leaderboardPoller:false
+			};
+			function leaderboardOpen() {
+				if (!leaderboard.leaderboardOpen) {heightOption= "500px"} else {heightOption= "20px"}
+                $( "#leaderboardTab" ).animate({
+                    height: heightOption
+                }, 1000, function() {
+                    if (!leaderboard.leaderboardPoller) {
+                        leaderboardPoll();
+                     }
+                     leaderboard.leaderboardPoller = true;                 
+                });
+                
+                leaderboard.leaderboardOpen = !leaderboard.leaderboardOpen;
+			}
+			
+			$( "#leaderboardTab" ).click(function() {
+			    leaderboardOpen();
+            });
+            $( "#submission" ).click(function() {
+             
+             	submitted = true;
+				leaderData[leaderData.length-1] = {
+                    "username" :userInfo,
+                    "id" : leaderData.length,
+                    "score" : 0
+                };
+                addedLeader = leaderData.length -1;
+                if (leaderboard.leaderboardPoller) {
+ 					$("#leaderboard").append('<li id="row' + addedLeader +'" style="position:absolute"><h1 style="display:inline" id="user-' + leaderData[addedLeader].id + '">' + ((leaderData[addedLeader].score * .01).toFixed(2)) + '%</h1>' + '&nbsp;' + leaderData[addedLeader].username + '</li>');
+            		leaderboardSort();
+            		if (!leaderboard.leaderboardOpen) {
+            			leaderboardOpen();
+            		}
+            		//console.log('ssd');
+            	} else {
+            		//console.log(leaderData);
+            		leaderboardPoll();
+            		leaderboard.leaderboardPoller = true; 
+            		leaderboardOpen();
+            	}
+            	$('#submission').hide();
+            	//leaderboardOpen();
+            	
+            });
+		</script>
+		<script type="text/javascript" src="three.js"></script>
+	</body>
+
+</html>
+
