@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>The Imaginary - Art by Alex Tarampi</title>
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.1.1/css/bootstrap.min.css">
+        <link rel="stylesheet" href="js/slick.css">
+        <link rel="stylesheet" href="js/slick-theme.css">
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js" ></script>
+        <!--<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.4/hammer.min.js"></script>
+        <script type="text/javascript" src="js/jquery.hammer.js"></script>
+       -->
+        
+        <script type="text/javascript" src="http://theimaginary.net/js/slick.min.js" ></script>
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js" ></script>
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.2.1/backbone-min.js" ></script>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link href="http://theimaginary.net/Images/2.0/favicon.ico" rel="Shortcut Icon" type="image/x-icon"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
+        <script src="//cdnjs.cloudflare.com/ajax/libs/modernizr/2.7.1/modernizr.min.js" type="text/javascript"></script>
+        <script src="http://www.google-analytics.com/urchin.js" type="text/javascript"></script>
+        <link href='http://fonts.googleapis.com/css?family=Fredericka+the+Great' rel='stylesheet' type='text/css'>
+        <style>
+            .responsive .imageHolder {padding: 0px 10px;}
+            .slick-list {min-height:300px;}
+            .detailView {padding:10px;}
+            #mainWindow {margin-top:50px;}
+            h1, .btn {font-family: 'Fredericka the Great', cursive;color:black}
+            .page ul {list-style: none;width:100%}
+            .page li {float:left;padding-left:15px;}
+            .page li a {color:black}
+            .page ul:after {
+              content:"";
+              display:table;
+              clear:both;
+            }
+            @media (max-width: 600px) {
+              h1 {
+                font-size:24px;
+                padding-left:15px;
+              }
+              .page li {padding-left:0px;padding-right:5px;}
+            }
+            
+            h2 {font-size:24px;font-family: 'Fredericka the Great', cursive;}
+            .detailView {display:none;position:absolute;top:0px;left:0px;width:100%;background-color:rgba(255, 255, 255, 0.5);text-align:center;z-index:999}
+            .controlRack {display:none;position:absolute;top:0px;left:0px;width:100%;height:50px;text-align:center;padding:10px;z-index:10000}
+            .copyright {position:fixed;bottom:0px;right:0px;padding:10px;font-family: 'Fredericka the Great', cursive;}
+            #mainWindow span {font-size:12px;}
+        </style>
+        <script type="text/javascript">
+            _uacct = "UA-1614371-1";
+        </script>
+    </head>
+
+    <body style="background-color:#E0E0E0;position:relative;">
+        <div class="container">
+            <h1><a href='#/'>Alex Tarampi Art</a></h1>
+            <hr />
+            <div class="page"></div>
+            
+        </div>
+        <div class="controlRack">
+                <a id="closeButton" class="btn btn-primary">Close</a>
+                <a class="btn leftButton">Previous</a>
+                <a class="btn rightButton">Next</a>
+        </div>
+        <div class="detailView"></div>
+        <div class="copyright"> &copy; <script type="text/javascript">var dteNow = new Date();var intYear = dteNow.getFullYear();document.write(intYear);</script> Alex Tarampi <span><a href="https://instagram.com/atarampi/" target="_blank" /><img src="Images/2.0/instagram-icon.png" width="50" height="50" /></a></span><span><a href="https://twitter.com/Alex_Tarampi" target="_blank" /><img src="Images/2.0/twitter-icon.png" width="50" height="50" /></a></span></div>
+        
+        <script type="text/template" id="image-list-template">
+            <ul>
+                <li><a href="#/yearRange/2013-2015">2013-2015</a></li>
+                <li><a href="#/yearRange/2009-2012">2009-2012</a></li>
+                <li><a href="#/yearRange/2004-2008">2004-2008</a></li>
+                <li><a href="#/yearRange/1999-2003">1999-2003</a></li>
+            </ul>
+            <div id="mainSlider" class="slider responsive">
+           <% _.each(images, function(image, index) {  %>
+                <div class="imageHolder"><a href="#/detail/<%= image.src %>" class="btn"><img src="thumber.php?img=Images/2.0/illustration/<%= image.src %>.jpg&h=<%= thumbHeight %>"></a></div>
+           <% }); %>
+           </div>
+        </script>
+        <script type="text/template" id="image-detail-template">
+            
+            <% if (image.hasOwnProperty("project")) {  %>
+                <div class="row" id="mainWindow" data-index="<%= index %>"><img src="Images/2.0/projects/<%= image.project %>/<%= prjctIndex %>.jpg"><h2><%= image.title %></h2></div>
+            <% } else {  %>
+                <div class="row" id="mainWindow" data-index="<%= index %>"><img src="Images/2.0/illustration/<%= image.src %>.jpg"><h2><%= image.title %> <span><%= image.year %></span></h2></div>
+            <%  }  %>
+            <br clear="all">
+        </script>
+
+        <script>
+            var tempObject = {};
+            var masterSlider = 'mainSlider';
+            var masterWindow = 'mainWindow';
+            var turnOnInterval = false;
+            var insideYearRange = false;
+            var thumbHeight = 200;
+            var closeDetail = function(){
+                $( '.detailView' ).toggle();
+            };
+            
+            var intervalID = function(){
+                turnOnInterval = window.setInterval(function(){
+                    $('.responsive').slick('slickNext');
+                }, 2000);
+            };
+            
+            var checkOS = function () {
+              var userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            
+              if( userAgent.match( /iPad/i ) || userAgent.match( /iPhone/i ) || userAgent.match( /iPod/i ) )
+              {
+                return 'iOS';
+            
+              }
+              else if( userAgent.match( /Android/i ) )
+              {
+            
+                return 'Android';
+              }
+              else
+              {
+                return 'unknown';
+              }
+            };
+            var osType = checkOS();
+            if(osType == 'unknown') {
+                jQuery('.container').css('width', '70%');
+                thumbHeight = 300;
+                
+            } else {
+                jQuery('.container').css('width', '100%')
+            };
+            jQuery('.detailView').css('height', window.outerHeight);
+            
+            var resetInterval = function(test){
+                if(turnOnInterval) {
+                    turnOffInterval();
+                    setTimeout(function(){
+                        intervalID();
+                    }, 1000);
+                    turnOnInterval = false;
+                }
+            };
+            
+            var turnOffInterval = function(){
+                clearInterval(turnOnInterval);
+            };
+            
+            var Images = Backbone.Collection.extend({
+               url: 'templates/backboneTest.json',
+               sync : function(method, collection, options) {
+                 options.dataType = "json";
+                 return Backbone.sync(method, collection, options);
+               }
+            });
+            
+            
+            var ImageDetail = Backbone.View.extend({
+                el: '.detailView',
+                render: function (options) {
+                    var dataObject = {};
+                    var projectId = '';
+                    var imageIndex = null;
+                    var projectIndex = null;
+                    console.warn("options ID " + options.id);
+                    if(options.id.indexOf('projects-') > -1 ) {
+                        projectId = options.id.split('-')[1];
+                        projectIndex = parseInt(options.id.split('-')[2]);
+                    }
+                    for (i = 0; i < tempObject.length; i++) { 
+                        
+                        if(tempObject[i].hasOwnProperty("project")) {
+                            
+                            if(projectId == tempObject[i].project) {
+                                dataObject = tempObject[i];
+                                imageIndex = i;
+                            } 
+                        } else {
+                            if(tempObject[i].src == options.id) {
+                                dataObject = tempObject[i];
+                                imageIndex = i;
+                            }
+                       }
+                    }
+                    var template = _.template($('#image-detail-template').html())({image: dataObject, index:imageIndex, prjctIndex:projectIndex, thumbHeight:thumbHeight });
+                    this.$el.html(template);
+                    $('#' + masterSlider).slick('slickGoTo', imageIndex);
+                    
+                    
+                    
+                    $( '.detailView, .controlRack' ).show();
+                }
+            });
+
+            
+            var ImageList = Backbone.View.extend({
+                el: '.page',
+                render: function (options) {
+                	console.warn(options);
+                	var yearDefined = false;
+                	tempObject = imageSet;
+                	if(options.hasOwnProperty("year")){
+                		var specificImagesByYear = [];
+                		var yearRange = false;
+                		if(options.year.indexOf("-") > -1) {
+                		    var minYear = options.year.split("-")[0];
+                		    var maxYear = options.year.split("-")[1];
+                		    yearRange = true;
+                		};
+	                	for (i = 0; i < imageSet.length; i++) { 
+	                	    if(yearRange){
+	                	        var deMarcation = imageSet[i].year >= minYear && imageSet[i].year <= maxYear;
+	                	    } else {
+	                	        var deMarcation = (imageSet[i].year == options.year);
+	                	    };
+	                        if(deMarcation) {
+                               specificImagesByYear.push(imageSet[i]);
+                               imageIndex = i;
+                            }
+	                        
+	                   };
+	                   yearDefined = true;
+	                   tempObject = specificImagesByYear;
+                	};
+                	
+                    var template = _.template($('#image-list-template').html())({images: tempObject });
+                    this.$el.html(template);
+                    
+                    $('#' + masterSlider).slick({
+                      //lazyLoad: 'ondemand',
+                      centerMode: true,
+                      dots: true,
+          
+                      cssEase: 'linear',
+                      centerPadding: '60px',
+                      infinite: true,
+                      speed: 300,
+                      slidesToShow: 1,
+                      slidesToScroll: 4,
+                      variableWidth: true,
+                      centerMode: true,
+                      adaptiveHeight: true,
+                      
+                      responsive: [
+                        {
+                          breakpoint: 1024,
+                          settings: {
+                            slidesToShow: 3,
+                            slidesToScroll: 3,
+                            infinite: true,
+                            dots: true
+                          }
+                        },
+                        {
+                          breakpoint: 600,
+                          settings: {
+                            arrows: false,
+                            slidesToShow: 2,
+                            slidesToScroll: 2
+                          }
+                        },
+                        {
+                          breakpoint: 480,
+                          settings: {
+                            arrows: false,
+                            slidesToShow: 1,
+                            slidesToScroll: 1,
+                            dots: false
+                          }
+                        }
+                      ]
+                    });
+                    jQuery('.slick-prev, .slick-next').on('click', function(event, slick, direction){
+                        resetInterval();
+                    });
+                    jQuery('.slick-slider').on('swipe', function(event, slick, direction){
+                        resetInterval();
+                    });
+                }
+            });
+            
+           
+            var Router = Backbone.Router.extend({
+                routes: {
+                    '' : 'home',
+                    'yearRange/:year' : 'yearSearch',
+                    'detail/:src': 'imageDetail'
+                }
+            });
+            
+        
+            var images = new Images();
+            images.fetch({
+                type: 'POST',
+                success : function(data){
+                    imageSet = data.models[0].attributes.images;
+                    projectSet = data.models[0].attributes.projects;
+                    //console.warn(year);
+                    var imageList = new ImageList();
+                    var imageDetail = new ImageDetail();
+                    var router = new Router();
+            
+                    router.on('route:home', function(){
+                        var attr = $('body').attr('data-year');
+                    	if (!(jQuery('.page').children().length > 0)) {  
+                            imageList.render({});
+                        } else if (typeof attr !== "undefined"){
+                            turnOffInterval();
+                            jQuery('.page').empty();
+                            $('#' + masterSlider).slick('unslick');
+                            $('body').removeAttr('data-year');
+                            imageList.render({});
+                        };
+                        jQuery("body").removeClass();
+                        $( '.detailView, .controlRack' ).hide();
+                        intervalID();
+                        urchinTracker();
+                    });
+                    
+                    router.on('route:yearSearch', function(year){
+						jQuery("body").addClass('year');
+						jQuery("body").attr('data-year', year);
+						jQuery('.page').empty();
+                            $('#' + masterSlider).slick('unslick');
+                            turnOffInterval();
+                            imageList.render({year: year});
+                        $( '.detailView, .controlRack' ).hide();
+                        intervalID();
+                        urchinTracker();
+                    });
+                    
+                    router.on('route:imageDetail', function(src){
+						jQuery("body").addClass('detail');
+                        if(!(jQuery('.page').children().length > 0)) {
+                            imageList.render({});
+                        }
+                        imageDetail.render({id: src});
+                        turnOffInterval();
+                        urchinTracker();
+                    });
+
+                    Backbone.history.start();
+                }
+            });
+            
+            
+            jQuery('.detailView, #closeButton').click(function(event){
+                var attr = $('body').attr('data-year');
+                if(typeof attr !== "undefined") {
+                    insideYearRange = true;
+                    var year = $('body').data('year');
+                    window.location.href = '#/yearRange/' + year;
+                } else {
+                	window.location.href = '#/';
+                }
+                if(typeof $(this).attr('id') === "undefined") {
+                    $(this ).hide();
+                }
+                $('.controlRack').hide();
+            })
+            
+            jQuery('.leftButton').on("click", function(event) {
+                $('.responsive').slick('slickPrev');
+
+                var imageIndex = $('#' + masterWindow).data('index');
+                var prevIndex = (imageIndex==0) ? (tempObject.length - 1) :--imageIndex;
+                window.location.href= "#/detail/" + tempObject[prevIndex].src;
+            });
+            jQuery('.rightButton').on("click", function(event) {
+                $('.responsive').slick('slickNext');
+
+                var imageIndex = $('#' + masterWindow).data('index');
+                if(imageIndex == (tempObject.length - 1)) {
+                    var nextIndex = 0;
+                } else {
+                    var nextIndex = ++imageIndex;
+                };
+                window.location.href= "#/detail/" + tempObject[nextIndex].src;
+            });
+            
+            
+            
+        </script>
+        
+        
+    </body>
+</html>
