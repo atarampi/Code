@@ -1,0 +1,133 @@
+{
+    "projects" : [
+        {
+	        "project": "neo",
+	        "index" : 24,
+	        "year" : 2011
+	    }
+    ],
+    "images" : [
+    
+    	    {
+	        "title": "Expecting!",
+	        "year" : 2015,
+	        "src" : "anncmnt"
+	    },{
+	        "title": "",
+	        "year" : 2012,
+	        "src" : "octopus"
+	    }, {
+	        "title": "",
+	        "year" : 2012,
+	        "src" : "rooster"
+	    }, {
+	        "title": "Cover Image for the book, <i><a href='http://www.palgrave.com/products/title.aspx?pid=575836' target='new'>Intuitions in Literature, Technology, and Politics</a></i>, by Alan Ram&#243;n Clinton",
+	        "year" : 2012,
+	        "src" : "clinton"
+	    }, {
+	        "title": "",
+	        "year" : 2012,
+	        "src" : "airplane"
+	    }, {
+	        "title": "Character Design",
+	        "year" : 2012,
+	        "src" : "jb"
+	    }, {
+	        "title": "Illustration for <a href='http://www.nyneofuturists.org/' target='new'>Too Much Light Makes The Baby Go Blind</a>, 2012 Chapbook",
+	        "year" : 2012,
+	        "src" : "multitasking"
+	    }, {
+	        "title": "Illustration for Paolo Javier's <a href='http://verysmallkitchen.com/tag/a-pigeon-a-kitchen-and-an-annexe/' target='new'>obb: aka The Original Brown Boy</a>",
+	        "year" : 2012,
+	        "src" : "OBB1"
+	    }, {
+	        "title": "",
+	        "year" : 2009,
+	        "src" : "Jester-soul"
+	    },{
+	        "title": "Starman",
+	        "year" : 2008,
+	        "src" : "MemIm-day1a"
+	    },{
+	        "title": "Containment",
+	        "year" : 2008,
+	        "src" : "MINDA3x"
+	    },{
+	        "title": "Optimus Prime",
+	        "year" : 2008,
+	        "src" : "optimus"
+	    },{
+	        "title": "",
+	        "year" : 2007,
+	        "src" : "chasm"
+	    },{
+	        "title": "",
+	        "year" : 2006,
+	        "src" : "symposium"
+	    },{
+	        "title": "",
+	        "year" : 2006,
+	        "src" : "self-experiment"
+	    },{
+	        "title": "",
+	        "year" : 2006,
+	        "src" : "group"
+	    },{
+	        "title": "",
+	        "year" : 2005,
+	        "src" : "bw"
+	    },{
+	        "title": "",
+	        "year" : 2004,
+	        "src" : "distress-call"
+	    },{
+	        "title": "The Ball of Masonry: Stephen Crane",
+	        "year" : 2003,
+	        "src" : "b2"
+	    },{
+	        "title": "",
+	        "year" : 2003,
+	        "src" : "scared_bunnies"
+	    },{
+	        "title": "",
+	        "year" : 2003,
+	        "src" : "Grabbed"
+	    },{
+	        "title": "The Devouring Hills",
+	        "year" : 2003,
+	        "src" : "mouths_jpg"
+	    },{
+	        "title": "Boss Fight",
+	        "year" : 2002,
+	        "src" : "dragon_jpg"
+	    },{
+	        "title": "Jester",
+	        "year" : 2002,
+	        "src" : "JesterSoul_jpg"
+	    },{
+	        "title": "Sister Sister",
+	        "year" : 2002,
+	        "src" : "opendoor"
+	    },{
+	        "title": "The Brutality Beneath",
+	        "year" : 1999,
+	        "src" : "Brutality_Minor_jpg"
+	    },{
+	        "title": "Guide",
+	        "year" : 2001,
+	        "src" : "SpiderGuy_jpg"
+	    },{
+	        "title": "Descent",
+	        "year" : 2000,
+	        "src" : "vortexdescent"
+	    },{
+	        "title": "Engine Core",
+	        "year" : 1999,
+	        "src" : "Engine-concept"
+	    }, {
+	        "title": "Through the Door",
+	        "year" : 1999,
+	        "src" : "hole2"
+	    }
+    ]
+}
