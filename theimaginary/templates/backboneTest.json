@@ -6,12 +6,51 @@
 	        "year" : 2011
 	    }
     ],
+    "photos" : [
+        {
+	        "title": "Sorsogon",
+	        "year" : 2008,
+	        "src" : "sorsogon"
+	    }, {
+	        "title": "Corregidor",
+	        "year" : 2008,
+	        "src" : "corregidor"
+	    }, {
+	        "title": "Mayon Volcano",
+	        "year" : 2008,
+	        "src" : "mayon-volcano"
+	    }, {
+	        "title": "Mayon Volcano",
+	        "year" : 2008,
+	        "src" : "mayon-volcano-2"
+	    }, {
+	        "title": "Manila",
+	        "year" : 2008,
+	        "src" : "river"
+	    }
+    ],
     "images" : [
     
     	    {
 	        "title": "Expecting!",
 	        "year" : 2015,
 	        "src" : "anncmnt"
+	    },{
+	        "title": "Cover for <a href='http://www.nightboat.org/title/court-dragon' target='new'>Court of the Dragon</a>, by Paolo Javier",
+	        "year" : 2015,
+	        "src" : "cotd"
+	    },{
+	        "title": "Fresh off the Boat - promo for <a href='http://thenerdsofcolor.org/' target='new'>The Nerds of Color</a>",
+	        "year" : 2015,
+	        "src" : "fotb"
+	    },{
+	        "title": "Adventurer",
+	        "year" : 2014,
+	        "src" : "sewer"
+	    },{
+	        "title": "Ruby Ibarra - Cover for <a href='http://blog.angryasianman.com/2014/01/chops-presents-strength-in-numbers.html'  target='new'>Strength in Numbers</a>, by Producer Chops",
+	        "year" : 2013,
+	        "src" : "ruby.ibarra"
 	    },{
 	        "title": "",
 	        "year" : 2012,
